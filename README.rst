@@ -11,19 +11,23 @@ DiscordChatExporterPy
 
 DiscordChatExporterPy is a Python plugin for your discord.py bot, allowing you to export a discord channels history within a guild.
 
-Installing
-----------
-To install the library to your bot, run the command:
+! WARNING !
+-----------
+This fork adds a local_export function that additionally performs local downloads of any resources linked in a discord channels history.
+This creates a more complete export for longer useability by no longer relying on external resources.
 
-.. code:: sh
+THIS HAS SEVERE SECURITY IMPLICATIONS if not used in a well controlled environment. TO MITIGATE THIS:
+1 - You need to control what content your users submit to channels.
+2 - You need to control who has access to the export functionality.
+3 - You need to protect the machine and your network from possible damage by downloading content.
+4 - You need to ensure anyone or anything with access to the files on the machine is prevented from, or is extremely careful with the execution of downloaded content.
 
-    pip install chat-exporter
+YOU ALSO NEED to respect PRIVACY and COPYRIGHT concerns in use of this functionality. Users on your Discord server are already expected to comply with these in the usual manner through Discord's Terms of Service. But use of this function places similar responsibilities on you as a data holder.
 
-To install the repository, run the command:
-
-.. code:: sh
-
-    git clone https://github.com/mahtoid/DiscordChatExporterPy
+Other Minor Additions
+---------------------
+- Support for playable gifs / video / gifv from embeds in the export.
+- prettified html output that is a bit more human readable.
 
 Usage
 -----
@@ -105,18 +109,19 @@ the bot to transcribe message times to. Passing 'guild' is optional and is only 
 *Optional: tz_info is optional, but can be used to set a 'local' (pytz) timezone for the bot to transcribe message times to.
 Passing 'guild' is optional and is only necessary when using enhanced-dpy.*
 
-Screenshots
------------
+**Local Export Usage*
 
-.. image:: https://raw.githubusercontent.com/mahtoid/DiscordChatExporterPy/master/.screenshots/channel_output.png
+.. code:: py
 
-.. image:: https://raw.githubusercontent.com/mahtoid/DiscordChatExporterPy/master/.screenshots/html_output.png
+    @bot.command()
+    async def save(ctx):
+        export_dir_name = "export_folder"
+        await chat_exporter.local_export(ctx.channel, guild, limit, timezone, export_dir_name)
+        return
 
-Links
------
-- `Wiki <https://github.com/mahtoid/DiscordChatExporterPy/wiki/>`_
-- `Discord Server <https://discord.gg/mq3hYaJSfa>`_
+*The export directory name that files get placed in is relative to the main entry point of the python program. See comments snippets above for guild, limit and timezone argument explanations.
 
 Attributions
 ------------
+Original code as https://github.com/mahtoid/DiscordChatExporterPy by https://github.com/mahtoid
 *This project borrows CSS and HTML code from* `Tyrrrz's C# DiscordChatExporter <https://github.com/Tyrrrz/DiscordChatExporter/>`_ *repository.*

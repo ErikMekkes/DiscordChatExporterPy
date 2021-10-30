@@ -82,22 +82,12 @@ def download_embeds(embed, directory, embed_id):
                 embed.image.url,
                 directory, embed_id, "_image_url"
             )
-        if embed.image.proxy_url != discord.Embed.Empty:
-            embed._image["proxy_url"] = local_download(
-                embed.image.proxy_url,
-                directory, embed_id, "_image_proxy_url"
-            )
     # video: url, proxy_url, height, width
     if embed.video != discord.Embed.Empty:
         if embed.video.url != discord.Embed.Empty:
             embed._video["url"] = local_download(
                 embed.video.url,
                 directory, embed_id, "_video_url"
-            )
-        if embed.video.proxy_url != discord.Embed.Empty:
-            embed._video["proxy_url"] = local_download(
-                embed.video.proxy_url,
-                directory, embed_id, "_video_proxy_url"
             )
     # thumbnail: url, proxy_url, height, width
     if embed.thumbnail != discord.Embed.Empty:
@@ -106,11 +96,6 @@ def download_embeds(embed, directory, embed_id):
                 embed.thumbnail.url,
                 directory, embed_id, "_thumbnail_url"
             )
-        if embed.thumbnail.proxy_url != discord.Embed.Empty:
-            embed._thumbnail["proxy_url"] = local_download(
-                embed.thumbnail.proxy_url,
-                directory, embed_id, "_thumbnail_proxy_url"
-            )
     # footer: text, icon_url, proxy_icon url (not very interesting)
     if embed.footer != discord.Embed.Empty:
         if embed.footer.icon_url != discord.Embed.Empty:
@@ -118,12 +103,10 @@ def download_embeds(embed, directory, embed_id):
                 embed.footer.icon_url,
                 directory, embed_id, "_footer_icon_url"
             )
-        if embed.footer.proxy_icon_url != discord.Embed.Empty:
-            embed._footer["proxy_icon_url"] = local_download(
-                embed.footer.proxy_icon_url,
-                directory, embed_id, "_footer_proxy_icon_url"
-            )
+    # other possible resources
     # provider: name, url (skipped, most likely just a site link)
+    # author: name, url, icon_url, proxy_icon_url
+    # possibly in fields but highly unlikely
 
 class BuildEmbed:
     r: str
@@ -220,18 +203,7 @@ class BuildEmbed:
             self.author = author_icon
 
     async def build_image(self):
-        if self.embed.image.proxy_url != discord.Embed.Empty:
-            self.image = await fill_out(
-                self.guild,
-                embed_image,
-                [(
-                    "EMBED_IMAGE",
-                    str(self.embed.image.proxy_url),
-                    PARSE_MODE_NONE
-                )]
-            )
-            self.thumbnail = ""
-        elif self.embed.image.url != discord.Embed.Empty:
+        if self.embed.image.url != discord.Embed.Empty:
             self.image = await fill_out(
                 self.guild,
                 embed_image,
@@ -258,19 +230,7 @@ class BuildEmbed:
             self.image = ""
     
     async def build_video(self):
-        if self.embed.video.proxy_url != discord.Embed.Empty:
-            self.video = await fill_out(
-                self.guild,
-                embed_video,
-                [(
-                    "EMBED_VIDEO",
-                    str(self.embed.video.proxy_url),
-                    PARSE_MODE_NONE
-                )]
-            )
-            self.image = ""
-            self.thumbnail = ""
-        elif self.embed.video.url != discord.Embed.Empty:
+        if self.embed.video.url != discord.Embed.Empty:
             self.video = await fill_out(
                 self.guild,
                 embed_video,
