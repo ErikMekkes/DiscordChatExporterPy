@@ -1,5 +1,6 @@
 import io
 import re
+from pathlib import Path
 from pytz import timezone
 from datetime import timedelta
 from dataclasses import dataclass
@@ -29,7 +30,6 @@ def init_exporter(_bot):
     bot = _bot
     pass_bot(bot)
 
-
 async def export(
     channel: discord.TextChannel,
     guild: discord.Guild = None,
@@ -46,6 +46,32 @@ async def export(
         traceback.print_exc()
         print(f"Please send a screenshot of the above error to https://www.github.com/mahtoid/DiscordChatExporterPy")
 
+async def local_export(
+    channel: discord.TextChannel,
+    guild: discord.Guild = None,
+    limit: int = None,
+    set_timezone="Europe/London",
+    directory: str = "",
+):
+    if guild:
+        channel.guild = guild
+    # ensure dirname ends with slash
+    if directory[-1:] != "/":
+        directory += "/"
+
+    # noinspection PyBroadException
+    try:
+        transcript = (await Transcript.local_export(channel, limit, set_timezone, directory)).html
+        file_dir = directory
+        file_name = f"{channel.id}-{channel.name}.html"
+        # ensure directory for local copy exists.
+        Path(file_dir).mkdir(parents=True, exist_ok=True)
+        file = open(file_dir+file_name, "wb")
+        file.write(transcript.encode())
+        file.close()
+    except Exception:
+        traceback.print_exc()
+        print(f"Please send a screenshot of the above error to https://www.github.com/mahtoid/DiscordChatExporterPy")
 
 async def raw_export(
     channel: discord.TextChannel,
@@ -111,6 +137,7 @@ class Transcript:
     channel: discord.TextChannel
     messages: List[discord.Message]
     timezone_string: str
+    directory: Optional[str] = None
     html: Optional[str] = None
 
     @classmethod
@@ -130,7 +157,31 @@ class Transcript:
             channel=channel,
             guild=channel.guild,
             messages=messages,
-            timezone_string=timezone(timezone_string)
+            timezone_string=timezone(timezone_string),
+        ).build_transcript()
+
+        return transcript
+    
+    @classmethod
+    async def local_export(
+        cls,
+        channel: discord.TextChannel,
+        limit: Optional[int],
+        timezone_string: str = "Europe/London",
+        directory: str = "chat_exporter/",
+    ) -> "Transcript":
+        if limit:
+            messages = await channel.history(limit=limit).flatten()
+            messages.reverse()
+        else:
+            messages = await channel.history(limit=limit, oldest_first=True).flatten()
+
+        transcript = await Transcript(
+            channel=channel,
+            guild=channel.guild,
+            messages=messages,
+            timezone_string=timezone(timezone_string),
+            directory=directory
         ).build_transcript()
 
         return transcript
@@ -158,7 +209,7 @@ class Transcript:
         message_html = ""
 
         for m in self.messages:
-            message_html += await Message(m, previous_message, self.timezone_string).build_input()
+            message_html += await Message(m, previous_message, self.timezone_string, self.directory).build_input()
             previous_message = m if "pins_add" not in str(m.type) and "thread_created" not in str(m.type)\
                 and m.type != 18 else None
 
@@ -213,11 +264,12 @@ class Message:
     time_format = "%b %d, %Y %I:%M %p"
     utc = timezone("UTC")
 
-    def __init__(self, message, previous_message, timezone_string):
+    def __init__(self, message, previous_message, timezone_string, directory="chat_exporter/"):
         self.message = message
         self.previous_message = previous_message
         self.timezone = timezone_string
         self.guild = message.guild
+        self.directory = directory
 
         self.time_string_create, self.time_string_edit = self.set_time()
 
@@ -274,11 +326,11 @@ class Message:
         ])
 
     async def build_assets(self):
-        for e in self.message.embeds:
-            self.embeds += await BuildEmbed(e, self.guild).flow()
+        for num, e in enumerate(self.message.embeds):
+            self.embeds += await BuildEmbed(e, self.guild, self.directory, f"{self.message.id}_{num}").flow()
 
         for a in self.message.attachments:
-            self.attachments += await BuildAttachment(a, self.guild).flow()
+            self.attachments += await BuildAttachment(a, self.guild, self.directory).flow()
 
         # discordpy beta
         if hasattr(self.message, "components") and discord.version_info.major == 2:
@@ -317,6 +369,8 @@ class Message:
 
     async def generate_message_divider(self, channel_audit=False):
         if channel_audit or self._generate_message_divider_check():
+            # TODO: missing two end divs from 'end.html' template for final message group
+            # probably an order-of-operations thing here / in build_message_template
             if self.previous_message is not None:
                 self.message_html += await fill_out(self.guild, end_message, [])
 

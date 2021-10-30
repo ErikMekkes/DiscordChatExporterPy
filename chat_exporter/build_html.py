@@ -69,6 +69,7 @@ embed_field_inline = read_file(dir_path + "/chat_exporter_html/embed/field-inlin
 embed_footer = read_file(dir_path + "/chat_exporter_html/embed/footer.html")
 embed_footer_icon = read_file(dir_path + "/chat_exporter_html/embed/footer_image.html")
 embed_image = read_file(dir_path + "/chat_exporter_html/embed/image.html")
+embed_video = read_file(dir_path + "/chat_exporter_html/embed/video.html")
 embed_thumbnail = read_file(dir_path + "/chat_exporter_html/embed/thumbnail.html")
 embed_author = read_file(dir_path + "/chat_exporter_html/embed/author.html")
 embed_author_icon = read_file(dir_path + "/chat_exporter_html/embed/author_icon.html")

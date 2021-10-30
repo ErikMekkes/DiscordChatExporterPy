@@ -11,15 +11,23 @@ from chat_exporter.build_html import (
 
 
 class BuildAttachment:
-    def __init__(self, attachments, guild):
+    def __init__(self, attachments, guild, directory=None):
         self.attachments = attachments
         self.guild = guild
+        self.directory = directory
 
     async def flow(self):
         await self.build_attachment()
         return self.attachments
 
     async def build_attachment(self):
+        # Lazy check if local downloading expected
+        if self.directory is not None:
+            f_name = (
+                f"{self.attachments.id}_{self.attachments.filename}"
+            )
+            await self.attachments.save(self.directory + f_name)
+            self.attachments.proxy_url = f_name
         if self.attachments.content_type is not None:
             if "image" in self.attachments.content_type:
                 return await self.image()
