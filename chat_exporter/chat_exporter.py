@@ -61,11 +61,11 @@ async def local_export(
 
     # noinspection PyBroadException
     try:
-        transcript = (await Transcript.local_export(channel, limit, set_timezone, directory)).html
         file_dir = directory
         file_name = f"{channel.id}-{channel.name}.html"
         # ensure directory for local copy exists.
         Path(file_dir).mkdir(parents=True, exist_ok=True)
+        transcript = (await Transcript.local_export(channel, limit, set_timezone, directory)).html
         file = open(file_dir+file_name, "wb")
         file.write(transcript.encode())
         file.close()
