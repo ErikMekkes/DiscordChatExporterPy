@@ -17,6 +17,7 @@ This fork adds a local_export function that additionally performs local download
 This creates a more complete export for longer useability by no longer relying on external resources.
 
 THIS HAS SEVERE SECURITY IMPLICATIONS if not used in a well controlled environment. TO MITIGATE THIS:
+
 1. You need to control what content your users submit to channels.
 2. You need to control who has access to the export functionality.
 3. You need to protect the machine and your network from possible damage by downloading content.
@@ -24,7 +25,7 @@ THIS HAS SEVERE SECURITY IMPLICATIONS if not used in a well controlled environme
 
 YOU ALSO NEED to respect PRIVACY and COPYRIGHT concerns in use of this functionality. Users on your Discord server are already expected to comply with these in the usual manner through Discord's Terms of Service. But use of this function places similar responsibilities on you as a data holder.
 
-Other Minor Additions
+**Other Minor Additions**
 ---------------------
 - Support for playable gifs / video / gifv from embeds in the export.
 - prettified html output that is a bit more human readable.
