@@ -41,18 +41,17 @@ def local_download(url, directory, embed_id, attribute):
         if e in url:
             extension = ext
     file = open(directory + embed_id + attribute + extension, 'wb')
-    response = requests.get(url, stream=True)
+    #TODO assumes downloading is reasonably quick, skips file if there
+    # are any conn problems, could do retry attempts / more robust stuff
     try:
         response = requests.get(url, stream=True)
     except Exception:
-        #TODO assumes downloading is reasonably quick / no conn problems
-        # could do retry attempts / more robust stuff
         file.close()
-        return False
+        return "missing_download"
     
     if not response.ok:
         file.close()
-        return False
+        return "missing_download"
     
     for block in response.iter_content(1024):
         if not block:
